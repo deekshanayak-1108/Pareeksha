@@ -15,7 +15,7 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DEV_DATABASE_URL',
-        'mysql+pymysql://user:pass@localhost/db_dev'
+        'sqlite:///pareeksha.db'
     )
 
 class TestingConfig(Config):
@@ -24,7 +24,7 @@ class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'TEST_DATABASE_URL',
-        'mysql+pymysql://user:pass@localhost/db_test'
+        'sqlite:///:memory:'
     )
 
 class ProductionConfig(Config):
@@ -33,7 +33,7 @@ class ProductionConfig(Config):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DATABASE_URL',
-        'mysql+pymysql://user:pass@localhost/db_prod'
+        'sqlite:///pareeksha_prod.db'
     )
 
 config_map = {
@@ -42,3 +42,4 @@ config_map = {
     'production': ProductionConfig,
     'default': DevelopmentConfig
 }
+

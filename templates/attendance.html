@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Mark Attendance - Pareeksha{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold text-gradient">Mark Student Attendance</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#" class="text-muted-custom">Home</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Attendance Portal</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Selector Room/Subject -->
+    <div class="col-lg-4 mb-4">
+        <div class="card premium-card p-4">
+            <h5 class="fw-bold text-gradient mb-3">Select Exam Details</h5>
+            <div class="mb-3">
+                <label for="room-select" class="form-label text-muted-custom">Select Room</label>
+                <select class="form-select premium-input" id="room-select">
+                    {% for r in rooms %}
+                        <option value="{{ r.room_no }}">Room {{ r.room_no }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="subject-select" class="form-label text-muted-custom">Select Subject</label>
+                <select class="form-select premium-input" id="subject-select">
+                    {% for s in subjects %}
+                        <option value="{{ s.subject_code }}">{{ s.subject_code }} - {{ s.subject_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="btn btn-primary-premium w-100" onclick="loadStudentsForAttendance()">Load Student List</button>
+        </div>
+    </div>
+
+    <!-- Student Attendance List -->
+    <div class="col-lg-8 mb-4">
+        <div class="card premium-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-gradient">Student List</h5>
+                <button id="submit-attendance-btn" class="btn btn-success btn-sm px-4" style="display: none;" onclick="submitAttendance()">Save Attendance</button>
+            </div>
+
+            <div id="attendance-status-message" class="alert alert-info" style="display: none;"></div>
+
+            <div class="table-responsive">
+                <table class="table table-dark table-striped align-middle" id="attendance-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Seat No</th>
+                            <th>Student USN</th>
+                            <th>Student Name</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-list-tbody">
+                        <!-- Loaded dynamically via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-center p-5 text-muted-custom" id="empty-state">
+                <i class="bi bi-person-lines-fill display-3 mb-3"></i>
+                <p>Select Room and Subject to load allocated students</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function loadStudentsForAttendance() {
+    const room = document.getElementById('room-select').value;
+    const subject = document.getElementById('subject-select').value;
+    
+    fetch(`/attendance/${room}/${subject}`)
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById('student-list-tbody');
+            tbody.innerHTML = '';
+            
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            
+            if (data.length === 0) {
+                document.getElementById('attendance-table').style.display = 'none';
+                document.getElementById('submit-attendance-btn').style.display = 'none';
+                document.getElementById('empty-state').style.display = 'block';
+                document.getElementById('empty-state').innerHTML = `<p class="text-danger">No student allocations found for Room ${room} and Subject ${subject}.</p>`;
+                return;
+            }
+            
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('attendance-table').style.display = 'table';
+            document.getElementById('submit-attendance-btn').style.display = 'block';
+            
+            data.forEach(student => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="badge bg-secondary">${student.seat_no}</span></td>
+                    <td>${student.usn}</td>
+                    <td>${student.name}</td>
+                    <td>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="status-${student.student_id}" id="present-${student.student_id}" value="Present" ${student.attendance_status === 'Present' ? 'checked' : ''} ${student.attendance_status ? 'disabled' : ''}>
+                            <label class="form-check-label text-success" for="present-${student.student_id}">Present</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="status-${student.student_id}" id="absent-${student.student_id}" value="Absent" ${student.attendance_status === 'Absent' ? 'checked' : ''} ${student.attendance_status ? 'disabled' : ''}>
+                            <label class="form-check-label text-danger" for="absent-${student.student_id}">Absent</label>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+function submitAttendance() {
+    const room = document.getElementById('room-select').value;
+    const subject = document.getElementById('subject-select').value;
+    const tbody = document.getElementById('student-list-tbody');
+    const rows = tbody.getElementsByTagName('tr');
+    
+    const records = [];
+    for (let row of rows) {
+        const checkedInput = row.querySelector('input[type="radio"]:checked');
+        if (!checkedInput) {
+            alert('Please mark attendance (Present/Absent) for all students.');
+            return;
+        }
+        
+        // Extract student ID from name attribute (e.g. status-1 -> 1)
+        const nameAttr = checkedInput.getAttribute('name');
+        const studentId = parseInt(nameAttr.split('-')[1]);
+        const status = checkedInput.value;
+        
+        records.push({ student_id: studentId, status: status });
+    }
+    
+    fetch('/attendance/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            room_no: room,
+            subject_code: subject,
+            records: records
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            alert('Attendance saved successfully!');
+            loadStudentsForAttendance();
+        }
+    });
+}
+</script>
+{% endblock %}

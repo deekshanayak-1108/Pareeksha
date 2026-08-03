@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Room Layout Editor - Pareeksha{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold text-gradient">Room Layout Editor</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#" class="text-muted-custom">Home</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Layout Editor</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Controls Config -->
+    <div class="col-lg-4 mb-4">
+        <div class="card premium-card p-4">
+            <h5 class="fw-bold text-gradient mb-3">Layout Parameters</h5>
+            <form id="layout-form">
+                <div class="mb-3">
+                    <label for="rows" class="form-label text-muted-custom">Rows</label>
+                    <input type="number" class="form-control premium-input" id="rows" value="6" min="1" max="12">
+                </div>
+                <div class="mb-3">
+                    <label for="cols" class="form-label text-muted-custom">Columns</label>
+                    <input type="number" class="form-control premium-input" id="cols" value="6" min="1" max="12">
+                </div>
+                <div class="mb-3">
+                    <label for="bench-capacity" class="form-label text-muted-custom">Bench Capacity</label>
+                    <select class="form-select premium-input" id="bench-capacity">
+                        <option value="2">2 Seats (Default)</option>
+                        <option value="1">1 Seat</option>
+                        <option value="3">3 Seats</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="door-pos" class="form-label text-muted-custom">Door Position</label>
+                    <select class="form-select premium-input" id="door-pos">
+                        <option value="bottom-right">Bottom Right</option>
+                        <option value="bottom-left">Bottom Left</option>
+                        <option value="top-right">Top Right</option>
+                        <option value="top-left">Top Left</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="blackboard-pos" class="form-label text-muted-custom">Blackboard Position</label>
+                    <select class="form-select premium-input" id="blackboard-pos">
+                        <option value="top">Top Center</option>
+                        <option value="bottom">Bottom Center</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="walkway-col" class="form-label text-muted-custom">Walkway Position (Column #)</label>
+                    <input type="number" class="form-control premium-input" id="walkway-col" value="3" min="0" max="12" placeholder="0 for none">
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-primary-premium" onclick="generateLayoutPreview()">Generate Layout</button>
+                    <button type="button" class="btn btn-success" onclick="saveLayout()">Save Configuration</button>
+                    <button type="button" class="btn btn-outline-premium" onclick="resetLayout()">Reset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Live Preview -->
+    <div class="col-lg-8 mb-4">
+        <div class="card premium-card p-4">
+            <h5 class="fw-bold text-gradient mb-3">Live Seating Preview</h5>
+            <div class="blueprint-container p-4 border border-secondary rounded position-relative" style="background-color: #0b0f19; min-height: 400px;">
+                <!-- Blackboard -->
+                <div id="preview-blackboard" class="text-center py-2 mb-4 bg-dark border border-secondary text-muted-custom rounded fw-bold">
+                    BLACKBOARD
+                </div>
+
+                <!-- Live Grid Container -->
+                <div id="preview-grid" class="d-grid gap-2 justify-content-center">
+                    <!-- Dynamic seats generated via JS -->
+                </div>
+
+                <!-- Door -->
+                <div id="preview-door" class="position-absolute border border-warning bg-warning text-dark text-center fw-bold small p-1 rounded" style="width: 60px;">
+                    DOOR
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/layout_editor.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Classroom Blueprint - Room {{ room.room_no }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold text-gradient">Classroom Blueprint: Room {{ room.room_no }}</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#" class="text-muted-custom">Home</a></li>
+                <li class="breadcrumb-item"><a href="#" class="text-muted-custom">Rooms</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Room {{ room.room_no }} Blueprint</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <!-- View Options / Controls -->
+    <div class="col-md-3 mb-4">
+        <div class="card premium-card p-4">
+            <h5 class="fw-bold text-gradient mb-3">View Mode</h5>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="viewMode" id="studentView" value="student" checked onchange="toggleViewMode()">
+                <label class="form-check-label text-white" for="studentView">
+                    Student View
+                </label>
+            </div>
+            <div class="form-check mb-4">
+                <input class="form-check-input" type="radio" name="viewMode" id="facultyView" value="faculty" onchange="toggleViewMode()">
+                <label class="form-check-label text-white" for="facultyView">
+                    Faculty View
+                </label>
+            </div>
+
+            <h5 class="fw-bold text-gradient mb-3">Legend</h5>
+            <div class="d-flex flex-column gap-2">
+                <div class="d-flex align-items-center">
+                    <span class="seat-legend bg-success me-2 rounded"></span>
+                    <span class="text-muted-custom small">🟩 Your Seat</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="seat-legend bg-white border me-2 rounded"></span>
+                    <span class="text-muted-custom small">⬜ Available Seat</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="seat-legend bg-primary me-2 rounded"></span>
+                    <span class="text-muted-custom small">🟦 Occupied Seat</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="seat-legend bg-dark border border-secondary me-2 rounded"></span>
+                    <span class="text-muted-custom small">⬛ Walkway</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Classroom Visual Grid -->
+    <div class="col-md-9 mb-4">
+        <div class="card premium-card p-4">
+            <div class="blueprint-container p-4 border border-secondary rounded position-relative" style="background-color: #0b0f19;">
+                
+                <!-- BLACKBOARD -->
+                <div class="text-center py-2 mb-5 bg-dark border border-secondary text-muted-custom rounded fw-bold">
+                    BLACKBOARD
+                </div>
+
+                <!-- Benches Grid (CSS Grid) -->
+                <!-- Example Grid using template structure -->
+                <div class="blueprint-grid d-grid gap-3 justify-content-center" style="grid-template-columns: repeat({{ room.columns }}, minmax(80px, 1fr));">
+                    {% for r in range(1, room.rows + 1) %}
+                        {% for c in range(1, room.columns + 1) %}
+                            <!-- Walkway check: assume col 3 is walkway -->
+                            {% if c == 3 %}
+                                <div class="walkway-cell bg-dark border border-secondary rounded d-flex align-items-center justify-content-center text-muted-custom small" style="min-height: 80px;">
+                                    WALKWAY
+                                </div>
+                            {% else %}
+                                {% set seat_index = (r-1) * room.columns + c %}
+                                {% set seat_code = "R" ~ room.room_no ~ "-S" ~ seat_index %}
+                                {% set allocation = alloc_map.get(seat_code) %}
+                                
+                                <div class="seat-cell p-2 border rounded text-center d-flex flex-column justify-content-between position-relative
+                                    {% if seat_index == 1 %}
+                                        bg-success text-white border-success your-seat
+                                    {% elif allocation %}
+                                        bg-primary text-white border-primary occupied-seat
+                                    {% else %}
+                                        bg-white text-dark border-secondary available-seat
+                                    {% endif %}" 
+                                    style="min-height: 80px; cursor: pointer;"
+                                    data-seat="{{ seat_code }}"
+                                    onclick="seatClicked(this)">
+                                    
+                                    <div class="fw-bold small">{{ seat_code }}</div>
+                                    
+                                    <!-- Faculty details (Name/USN) hidden by default in CSS, shown on Faculty view -->
+                                    <div class="faculty-details small text-truncate mt-1" style="display: none; font-size: 10px;">
+                                        {% if allocation %}
+                                            <span class="d-block">{{ allocation.name }}</span>
+                                            <span class="d-block text-muted-custom">{{ allocation.usn }}</span>
+                                        {% else %}
+                                            <span class="text-muted-custom">Vacant</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+
+                <!-- DOOR -->
+                <div class="position-absolute border border-warning bg-warning text-dark text-center fw-bold small p-1 rounded" style="width: 60px; bottom: 10px; right: 10px;">
+                    DOOR
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/blueprint.js') }}"></script>
+{% endblock %}

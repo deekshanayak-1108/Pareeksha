@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports - Pareeksha{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold text-gradient">Reports Center</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#" class="text-muted-custom">Home</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Reports</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card premium-card p-4 text-center">
+            <i class="bi bi-file-earmark-pdf display-5 text-danger mb-2"></i>
+            <h6>Room Seating Chart</h6>
+            <button class="btn btn-outline-premium btn-sm mt-3" onclick="exportReport('PDF')">Export PDF</button>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card premium-card p-4 text-center">
+            <i class="bi bi-file-earmark-excel display-5 text-success mb-2"></i>
+            <h6>Faculty Duty Schedule</h6>
+            <button class="btn btn-outline-premium btn-sm mt-3" onclick="exportReport('Excel')">Export Excel</button>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card premium-card p-4 text-center">
+            <i class="bi bi-printer display-5 text-info mb-2"></i>
+            <h6>Attendance Sheet</h6>
+            <button class="btn btn-outline-premium btn-sm mt-3" onclick="window.print()">Print Report</button>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card premium-card p-4 text-center">
+            <i class="bi bi-file-spreadsheet-fill display-5 text-warning mb-2"></i>
+            <h6>Allocation Summary</h6>
+            <button class="btn btn-outline-premium btn-sm mt-3" onclick="exportReport('CSV')">Export CSV</button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Student Allocations Table -->
+    <div class="col-lg-6 mb-4">
+        <div class="card premium-card p-4">
+            <h5 class="fw-bold text-gradient mb-3">All Student Seating Allocations</h5>
+            <div class="table-responsive">
+                <table class="table table-dark table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Room No</th>
+                            <th>Seat No</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if student_allocs %}
+                            {% for alloc in student_allocs %}
+                                <tr>
+                                    <td>{{ alloc.subject_code }}</td>
+                                    <td>Room {{ alloc.room_no }}</td>
+                                    <td>{{ alloc.seat_no }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td>CS601</td>
+                                <td>Room 101</td>
+                                <td>R101-S1</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Faculty Allocations Table -->
+    <div class="col-lg-6 mb-4">
+        <div class="card premium-card p-4">
+            <h5 class="fw-bold text-gradient mb-3">Faculty Duty Status Reports</h5>
+            <div class="table-responsive">
+                <table class="table table-dark table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Room No</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if faculty_allocs %}
+                            {% for alloc in faculty_allocs %}
+                                <tr>
+                                    <td>{{ alloc.subject_code }}</td>
+                                    <td>Room {{ alloc.room_no }}</td>
+                                    <td>{{ alloc.status }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td>CS601</td>
+                                <td>Room 101</td>
+                                <td><span class="badge bg-warning">Pending</span></td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportReport(type) {
+    alert('Exporting ' + type + ' report. Download started in background.');
+}
+</script>
+{% endblock %}

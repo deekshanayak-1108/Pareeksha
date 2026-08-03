@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Faculty Dashboard - Pareeksha{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold text-gradient">Faculty Dashboard</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#" class="text-muted-custom">Home</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Faculty Portal</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Display Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card premium-card p-3 text-center mb-3">
+            <div class="card-body">
+                <i class="bi bi-alarm text-warning display-6 mb-2"></i>
+                <h5 class="card-title text-muted-custom">Today's Duties</h5>
+                <h2 class="fw-bold text-white" id="today-duties-count">1</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card premium-card p-3 text-center mb-3">
+            <div class="card-body">
+                <i class="bi bi-calendar-event text-info display-6 mb-2"></i>
+                <h5 class="card-title text-muted-custom">Upcoming Duties</h5>
+                <h2 class="fw-bold text-white">2</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card premium-card p-3 text-center mb-3">
+            <div class="card-body">
+                <i class="bi bi-check-circle text-success display-6 mb-2"></i>
+                <h5 class="card-title text-muted-custom">Completed Duties</h5>
+                <h2 class="fw-bold text-white">4</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Duties Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card premium-card p-4">
+            <h4 class="fw-bold text-gradient mb-4">Assigned Invigilation Duties</h4>
+            <div class="table-responsive">
+                <table class="table table-dark table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Room</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if duties %}
+                            {% for duty in duties %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">{{ duty.subject_code }}</div>
+                                    </td>
+                                    <td>{{ duty.date }}</td>
+                                    <td>{{ duty.start_time }} - {{ duty.end_time }}</td>
+                                    <td>Room {{ duty.room_no }}</td>
+                                    <td>
+                                        {% if duty.status == 'Accepted' %}
+                                            <span class="badge bg-success">Accepted</span>
+                                        {% elif duty.status == 'Declined' %}
+                                            <span class="badge bg-danger">Declined</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        {% if duty.status == 'Pending' %}
+                                            <button class="btn btn-sm btn-success me-1" onclick="acceptDuty({{ duty.id }})">Accept</button>
+                                            <button class="btn btn-sm btn-danger me-1" onclick="openDeclineModal({{ duty.id }})">Decline</button>
+                                        {% endif %}
+                                        <a href="/blueprint/{{ duty.room_no }}/{{ duty.subject_code }}" class="btn btn-sm btn-outline-premium me-1">Seating</a>
+                                        <a href="/attendance-page" class="btn btn-sm btn-primary-premium">Attendance</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <!-- Seed visual default if database has no records yet -->
+                            <tr>
+                                <td><div class="fw-bold">CS601</div></td>
+                                <td>2026-08-10</td>
+                                <td>09:30:00 - 12:30:00</td>
+                                <td>Room 101</td>
+                                <td><span class="badge bg-warning">Pending</span></td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-success me-1" onclick="acceptDuty(1)">Accept</button>
+                                    <button class="btn btn-sm btn-danger me-1" onclick="openDeclineModal(1)">Decline</button>
+                                    <a href="/blueprint/101/CS601" class="btn btn-sm btn-outline-premium me-1">Seating</a>
+                                    <a href="/attendance-page" class="btn btn-sm btn-primary-premium">Attendance</a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Decline Reason Modal -->
+<div class="modal fade" id="declineModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold text-gradient">Decline Invigilation Duty</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="decline-allocation-id">
+                <div class="mb-3">
+                    <label for="decline-reason" class="form-label text-muted-custom">Reason for Decline</label>
+                    <textarea class="form-control premium-input" id="decline-reason" rows="3" placeholder="Enter reason (e.g. medical leave, overlapping research work)..." required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" onclick="submitDecline()">Decline Duty</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
