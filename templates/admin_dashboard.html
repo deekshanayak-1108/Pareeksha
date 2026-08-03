@@ -1,17 +1,17 @@
 {% extends 'base.html' %}
 
-{% block title %}Admin Dashboard - Pareeksha{% endblock %}
+{% block title %}Admin Dashboard - Pareeksha ERP{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <h2 class="fw-bold text-gradient">Admin Dashboard</h2>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#" class="text-muted-custom">Home</a></li>
-                <li class="breadcrumb-item active text-white" aria-current="page">Dashboard</li>
-            </ol>
-        </nav>
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <h2 class="fw-bold text-gradient">Admin Portal & Data Management</h2>
+        <p class="text-muted-custom">Manage classroom capacities, rosters, faculty assignments, and run allocation routines.</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <button class="btn btn-primary-premium me-2" data-bs-toggle="modal" data-bs-target="#uploadCsvModal">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Upload CSV Roster
+        </button>
     </div>
 </div>
 
@@ -60,7 +60,7 @@
     <div class="col-lg-6 mb-3">
         <div class="card premium-card p-4">
             <h4 class="fw-bold mb-3 text-gradient">Student Seating Allocation Engine</h4>
-            <p class="text-muted-custom">Run student allocation by selecting an upcoming subject code.</p>
+            <p class="text-muted-custom">Run student seating allocation for an exam subject across available rooms.</p>
             <div class="row g-3">
                 <div class="col-sm-8">
                     <select class="form-select premium-input" id="student-alloc-subject">
@@ -79,7 +79,7 @@
     <div class="col-lg-6 mb-3">
         <div class="card premium-card p-4">
             <h4 class="fw-bold mb-3 text-gradient">Faculty Invigilation Allocator</h4>
-            <p class="text-muted-custom">Assign available faculty to a specific room for an exam.</p>
+            <p class="text-muted-custom">Assign available faculty to a specific room for an exam session.</p>
             <div class="row g-3">
                 <div class="col-sm-4">
                     <select class="form-select premium-input" id="faculty-alloc-subject">
@@ -104,61 +104,80 @@
     </div>
 </div>
 
-<!-- CSV Upload Section -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card premium-card p-4">
-            <h4 class="fw-bold mb-3 text-gradient">Data Management (CSV Upload)</h4>
-            <div class="row">
-                <div class="col-md-3 text-center p-3">
-                    <i class="bi bi-filetype-csv display-5 text-primary mb-2"></i>
-                    <h6>Students.csv</h6>
-                    <button class="btn btn-outline-premium btn-sm mt-2">Upload Data</button>
-                </div>
-                <div class="col-md-3 text-center p-3">
-                    <i class="bi bi-filetype-csv display-5 text-success mb-2"></i>
-                    <h6>Faculty.csv</h6>
-                    <button class="btn btn-outline-premium btn-sm mt-2">Upload Data</button>
-                </div>
-                <div class="col-md-3 text-center p-3">
-                    <i class="bi bi-filetype-csv display-5 text-warning mb-2"></i>
-                    <h6>Rooms.csv</h6>
-                    <button class="btn btn-outline-premium btn-sm mt-2">Upload Data</button>
-                </div>
-                <div class="col-md-3 text-center p-3">
-                    <i class="bi bi-filetype-csv display-5 text-danger mb-2"></i>
-                    <h6>Subjects.csv</h6>
-                    <button class="btn btn-outline-premium btn-sm mt-2">Upload Data</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Tables section -->
+<!-- Data Management Tables -->
 <div class="row">
+    <!-- Students Management Table -->
     <div class="col-lg-6 mb-4">
         <div class="card premium-card p-4">
-            <h5 class="fw-bold text-gradient mb-3">Recent Faculty Duties</h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-gradient m-0">Student Roster</h5>
+                <button class="btn btn-outline-premium btn-sm" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                    <i class="bi bi-plus-lg"></i> Add Student
+                </button>
+            </div>
             <div class="table-responsive">
                 <table class="table table-dark table-striped align-middle">
                     <thead>
                         <tr>
-                            <th>Faculty Name</th>
-                            <th>Subject</th>
-                            <th>Room</th>
-                            <th>Status</th>
+                            <th>USN</th>
+                            <th>Name</th>
+                            <th>Dept / Sem</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="admin-faculty-duties-table">
-                        <!-- Loaded dynamically or static demo -->
-                        {% for f in faculties %}
+                    <tbody>
+                        {% for s in students %}
                             <tr>
-                                <td>{{ f.name }}</td>
-                                <td>CS601</td>
-                                <td>101</td>
-                                <td><span class="badge bg-warning">Pending</span></td>
+                                <td><span class="badge bg-secondary">{{ s.usn }}</span></td>
+                                <td>{{ s.name }}</td>
+                                <td>{{ s.department }} (Sem {{ s.semester }})</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-warning me-1" data-bs-toggle="modal" data-bs-target="#editStudentModal{{ s.id }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <form action="/admin/delete/students/{{ s.id }}" method="POST" class="d-inline" onsubmit="return confirm('Delete {{ s.name }}?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
+
+                            <!-- Edit Student Modal -->
+                            <div class="modal fade" id="editStudentModal{{ s.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content bg-dark text-white border border-secondary">
+                                        <div class="modal-header border-secondary">
+                                            <h5 class="modal-title text-gradient">Edit Student: {{ s.name }}</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form action="/admin/edit/students/{{ s.id }}" method="POST">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Full Name</label>
+                                                    <input type="text" name="name" class="form-control premium-input" value="{{ s.name }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">USN</label>
+                                                    <input type="text" name="usn" class="form-control premium-input" value="{{ s.usn }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Department</label>
+                                                    <input type="text" name="department" class="form-control premium-input" value="{{ s.department }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Semester</label>
+                                                    <input type="number" name="semester" class="form-control premium-input" value="{{ s.semester }}" required>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer border-secondary">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary-premium">Save Changes</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -166,31 +185,213 @@
         </div>
     </div>
 
+    <!-- Rooms Management Table -->
     <div class="col-lg-6 mb-4">
         <div class="card premium-card p-4">
-            <h5 class="fw-bold text-gradient mb-3">Room Information</h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-gradient m-0">Classroom Halls</h5>
+                <button class="btn btn-outline-premium btn-sm" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+                    <i class="bi bi-plus-lg"></i> Add Room
+                </button>
+            </div>
             <div class="table-responsive">
                 <table class="table table-dark table-striped align-middle">
                     <thead>
                         <tr>
                             <th>Room No</th>
                             <th>Capacity</th>
-                            <th>Layout Grid</th>
-                            <th>Action</th>
+                            <th>Grid Layout</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for r in rooms %}
                             <tr>
-                                <td>Room {{ r.room_no }}</td>
+                                <td><strong>Room {{ r.room_no }}</strong></td>
                                 <td>{{ r.capacity }} seats</td>
-                                <td>{{ r.rows }} x {{ r.columns }}</td>
-                                <td><a href="/blueprint/{{ r.room_no }}/CS601" class="btn btn-outline-premium btn-sm">Blueprint</a></td>
+                                <td>{{ r.rows }} Rows x {{ r.columns }} Cols</td>
+                                <td>
+                                    <a href="/blueprint/{{ r.room_no }}/CS601" class="btn btn-sm btn-outline-info me-1" title="View Blueprint">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-warning me-1" data-bs-toggle="modal" data-bs-target="#editRoomModal{{ r.id }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <form action="/admin/delete/rooms/{{ r.id }}" method="POST" class="d-inline" onsubmit="return confirm('Delete Room {{ r.room_no }}?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
+
+                            <!-- Edit Room Modal -->
+                            <div class="modal fade" id="editRoomModal{{ r.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content bg-dark text-white border border-secondary">
+                                        <div class="modal-header border-secondary">
+                                            <h5 class="modal-title text-gradient">Edit Room {{ r.room_no }}</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form action="/admin/edit/rooms/{{ r.id }}" method="POST">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Room Number</label>
+                                                    <input type="text" name="room_no" class="form-control premium-input" value="{{ r.room_no }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Total Capacity</label>
+                                                    <input type="number" name="capacity" class="form-control premium-input" value="{{ r.capacity }}" required>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-6 mb-3">
+                                                        <label class="form-label">Rows</label>
+                                                        <input type="number" name="rows" class="form-control premium-input" value="{{ r.rows }}" required>
+                                                    </div>
+                                                    <div class="col-6 mb-3">
+                                                        <label class="form-label">Columns</label>
+                                                        <input type="number" name="columns" class="form-control premium-input" value="{{ r.columns }}" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer border-secondary">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary-premium">Save Changes</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- CSV Upload Modal -->
+<div class="modal fade" id="uploadCsvModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-white border border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-gradient"><i class="bi bi-upload me-2"></i> Bulk CSV Upload Portal</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-4">
+                    <!-- Upload Students CSV -->
+                    <div class="col-md-6 border-end border-secondary">
+                        <h6 class="fw-bold text-primary mb-2"><i class="bi bi-people me-1"></i> Import Students CSV</h6>
+                        <form action="/admin/upload/students" method="POST" enctype="multipart/form-data">
+                            <input type="file" name="file" class="form-control premium-input mb-2" accept=".csv" required>
+                            <small class="text-muted-custom d-block mb-3">CSV Headers: <code>name, usn, department, semester</code></small>
+                            <button type="submit" class="btn btn-sm btn-primary-premium w-100">Upload Students</button>
+                        </form>
+                    </div>
+                    <!-- Upload Faculty CSV -->
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-success mb-2"><i class="bi bi-person-badge me-1"></i> Import Faculty CSV</h6>
+                        <form action="/admin/upload/faculty" method="POST" enctype="multipart/form-data">
+                            <input type="file" name="file" class="form-control premium-input mb-2" accept=".csv" required>
+                            <small class="text-muted-custom d-block mb-3">CSV Headers: <code>name, department, max_duties</code></small>
+                            <button type="submit" class="btn btn-sm btn-primary-premium w-100">Upload Faculty</button>
+                        </form>
+                    </div>
+                    <!-- Upload Rooms CSV -->
+                    <div class="col-md-6 border-end border-secondary">
+                        <h6 class="fw-bold text-warning mb-2"><i class="bi bi-door-closed me-1"></i> Import Rooms CSV</h6>
+                        <form action="/admin/upload/rooms" method="POST" enctype="multipart/form-data">
+                            <input type="file" name="file" class="form-control premium-input mb-2" accept=".csv" required>
+                            <small class="text-muted-custom d-block mb-3">CSV Headers: <code>room_no, capacity, rows, columns</code></small>
+                            <button type="submit" class="btn btn-sm btn-primary-premium w-100">Upload Rooms</button>
+                        </form>
+                    </div>
+                    <!-- Upload Subjects CSV -->
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-danger mb-2"><i class="bi bi-journal-bookmark me-1"></i> Import Subjects CSV</h6>
+                        <form action="/admin/upload/subjects" method="POST" enctype="multipart/form-data">
+                            <input type="file" name="file" class="form-control premium-input mb-2" accept=".csv" required>
+                            <small class="text-muted-custom d-block mb-3">CSV Headers: <code>subject_code, subject_name, department, semester, exam_date, start_time, end_time</code></small>
+                            <button type="submit" class="btn btn-sm btn-primary-premium w-100">Upload Subjects</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Student Modal -->
+<div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white border border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-gradient">Add New Student</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/admin/add/students" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Student Name</label>
+                        <input type="text" name="name" class="form-control premium-input" placeholder="e.g. Rahul Sharma" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">USN</label>
+                        <input type="text" name="usn" class="form-control premium-input" placeholder="e.g. 1MS22CS010" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Department</label>
+                        <input type="text" name="department" class="form-control premium-input" value="CSE" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Semester</label>
+                        <input type="number" name="semester" class="form-control premium-input" value="6" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary-premium">Add Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Room Modal -->
+<div class="modal fade" id="addRoomModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white border border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-gradient">Add New Classroom</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/admin/add/rooms" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Room Number</label>
+                        <input type="text" name="room_no" class="form-control premium-input" placeholder="e.g. 103" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Total Capacity</label>
+                        <input type="number" name="capacity" class="form-control premium-input" value="36" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Rows</label>
+                            <input type="number" name="rows" class="form-control premium-input" value="6" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Columns</label>
+                            <input type="number" name="columns" class="form-control premium-input" value="6" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary-premium">Add Room</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

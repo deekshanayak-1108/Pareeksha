@@ -36,15 +36,27 @@ def create_app(config_name=None):
 
     return app
 
+from routes.admin_routes import admin_bp
+
 def register_blueprints(app):
     """Registers blueprints."""
     app.register_blueprint(allocation_bp)
     app.register_blueprint(frontend_bp)
+    app.register_blueprint(admin_bp)
+
 
 def seed_data():
     """Seeds sample data for testing the allocation engine."""
-    from models.models import Student, Faculty, Room, Subject
+    from models.models import Student, Faculty, Room, Subject, User
     
+    if User.query.count() == 0:
+        users = [
+            User(username="admin", role="admin"),
+            User(username="faculty", role="faculty"),
+            User(username="student", role="student"),
+        ]
+        db.session.bulk_save_objects(users)
+
     if Student.query.count() == 0:
         # Create some students
         students = [

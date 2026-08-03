@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, session
 from models.models import Student, Faculty, Room, Subject, StudentAllocation, FacultyAllocation, Attendance
 
 frontend_bp = Blueprint('frontend', __name__)
@@ -7,16 +7,27 @@ frontend_bp = Blueprint('frontend', __name__)
 def login():
     if request.method == 'POST':
         role = request.form.get('role', 'student')
+        email = request.form.get('email', '')
+        
+        session['role'] = role
         if role == 'admin':
+            session['user_name'] = 'System Administrator'
             return redirect(url_for('frontend.admin_dashboard'))
         elif role == 'faculty':
+            session['user_name'] = 'Dr. Smitha Rao (CSE)'
             return redirect(url_for('frontend.faculty_dashboard'))
         else:
+            session['user_name'] = 'Deeksha Keshav Nayak (1MS22CS001)'
             return redirect(url_for('frontend.student_dashboard'))
+            
     return render_template('login.html')
 
 @frontend_bp.route('/admin')
 def admin_dashboard():
+    if not session.get('role'):
+        session['role'] = 'admin'
+        session['user_name'] = 'System Administrator'
+
     # Load dashboard counts
     stats = {
         "total_students": Student.query.count(),
@@ -32,12 +43,18 @@ def admin_dashboard():
 
 @frontend_bp.route('/faculty')
 def faculty_dashboard():
-    # For demo/mockup, assume we query allocations for an arbitrary faculty (e.g. Faculty ID 1)
+    if not session.get('role'):
+        session['role'] = 'faculty'
+        session['user_name'] = 'Dr. Smitha Rao (CSE)'
     duties = FacultyAllocation.query.all()
     return render_template('faculty_dashboard.html', duties=duties)
 
 @frontend_bp.route('/student')
 def student_dashboard():
+    if not session.get('role'):
+        session['role'] = 'student'
+        session['user_name'] = 'Deeksha Keshav Nayak (1MS22CS001)'
+
     # For demo/mockup, query allocations for an arbitrary student (e.g. Student ID 1)
     student = Student.query.first() or Student(name="Deeksha Nayak", usn="1MS22CS001", department="CSE", semester=6)
     allocations = StudentAllocation.query.filter_by(student_id=student.id).all()

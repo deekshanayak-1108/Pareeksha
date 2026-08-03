@@ -3,118 +3,162 @@
 {% block title %}Classroom Blueprint - Room {{ room.room_no }}{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <h2 class="fw-bold text-gradient">Classroom Blueprint: Room {{ room.room_no }}</h2>
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <h2 class="fw-bold text-gradient">Classroom Seating Blueprint: Room {{ room.room_no }}</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="#" class="text-muted-custom">Home</a></li>
                 <li class="breadcrumb-item"><a href="#" class="text-muted-custom">Rooms</a></li>
-                <li class="breadcrumb-item active text-white" aria-current="page">Room {{ room.room_no }} Blueprint</li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Room {{ room.room_no }} Layout</li>
             </ol>
         </nav>
     </div>
+    <div class="col-md-4 text-md-end">
+        <div class="btn-group" role="group">
+            <button class="btn btn-outline-premium active" onclick="switchView('student')">Student View</button>
+            <button class="btn btn-outline-premium" onclick="switchView('faculty')">Faculty View</button>
+        </div>
+    </div>
 </div>
 
-<div class="row">
-    <!-- View Options / Controls -->
-    <div class="col-md-3 mb-4">
-        <div class="card premium-card p-4">
-            <h5 class="fw-bold text-gradient mb-3">View Mode</h5>
-            <div class="form-check mb-2">
-                <input class="form-check-input" type="radio" name="viewMode" id="studentView" value="student" checked onchange="toggleViewMode()">
-                <label class="form-check-label text-white" for="studentView">
-                    Student View
-                </label>
-            </div>
-            <div class="form-check mb-4">
-                <input class="form-check-input" type="radio" name="viewMode" id="facultyView" value="faculty" onchange="toggleViewMode()">
-                <label class="form-check-label text-white" for="facultyView">
-                    Faculty View
-                </label>
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- 3D Classroom Floor Container -->
+        <div class="classroom-3d-wrapper shadow-lg mb-4">
+            
+            <!-- Side Windows on Left Wall -->
+            <div class="window-left" style="top: 120px;"></div>
+            <div class="window-left" style="top: 260px;"></div>
+            <div class="window-left" style="top: 400px;"></div>
+
+            <!-- Side Windows on Right Wall -->
+            <div class="window-right" style="top: 120px;"></div>
+            <div class="window-right" style="top: 260px;"></div>
+            <div class="window-right" style="top: 400px;"></div>
+
+            <!-- BLACKBOARD -->
+            <div class="blackboard-container">
+                BLACKBOARD
             </div>
 
-            <h5 class="fw-bold text-gradient mb-3">Legend</h5>
-            <div class="d-flex flex-column gap-2">
-                <div class="d-flex align-items-center">
-                    <span class="seat-legend bg-success me-2 rounded"></span>
-                    <span class="text-muted-custom small">🟩 Your Seat</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <span class="seat-legend bg-white border me-2 rounded"></span>
-                    <span class="text-muted-custom small">⬜ Available Seat</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <span class="seat-legend bg-primary me-2 rounded"></span>
-                    <span class="text-muted-custom small">🟦 Occupied Seat</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <span class="seat-legend bg-dark border border-secondary me-2 rounded"></span>
-                    <span class="text-muted-custom small">⬛ Walkway</span>
-                </div>
+            <!-- TEACHER'S DESK -->
+            <div class="teachers-desk-wrapper">
+                <div class="teachers-chair"></div>
+                <div class="teachers-desk">TEACHER'S DESK</div>
+            </div>
+
+            <!-- Rows and Benches Grid Structure (6 Rows x 3 Bench Columns) -->
+            <div class="container-fluid px-0">
+                {% for r in range(1, 7) %}
+                    <div class="row align-items-center mb-3">
+                        <!-- Row Label -->
+                        <div class="col-1 text-end pe-2">
+                            <span class="row-label">ROW {{ r }}</span>
+                        </div>
+
+                        <!-- 3 Columns of Benches -->
+                        <div class="col-11">
+                            <div class="row g-3 align-items-center">
+                                {% for c in range(1, 4) %}
+                                    {% set bench_num = (r - 1) * 3 + c %}
+                                    {% set seat_1 = (bench_num - 1) * 2 + 1 %}
+                                    {% set seat_2 = (bench_num - 1) * 2 + 2 %}
+
+                                    {% set seat_1_code = "R" ~ room.room_no ~ "-S" ~ seat_1 %}
+                                    {% set seat_2_code = "R" ~ room.room_no ~ "-S" ~ seat_2 %}
+
+                                    {% set alloc_1 = alloc_map.get(seat_1_code) %}
+                                    {% set alloc_2 = alloc_map.get(seat_2_code) %}
+
+                                    <!-- Bench Column -->
+                                    <div class="col-4 position-relative {% if c < 3 %}aisle-divider{% endif %}">
+                                        
+                                        <!-- Bench Card -->
+                                        <div class="bench-card">
+                                            <!-- Star Badge on Student's Assigned Seat (Default Bench 8 / Seats 15 & 16) -->
+                                            {% if bench_num == 8 or seat_1 == 15 or seat_2 == 15 %}
+                                                <div class="star-badge" title="You Are Here">⭐</div>
+                                            {% endif %}
+
+                                            <div class="d-flex justify-content-between gap-2">
+                                                <!-- Seat 1 -->
+                                                <div class="seat-box 
+                                                    {% if bench_num == 8 or seat_1 == 15 %}seat-your
+                                                    {% elif alloc_1 or seat_1 <= 12 or seat_1 >= 17 %}seat-other
+                                                    {% else %}seat-empty{% endif %}"
+                                                    data-seat="{{ seat_1_code }}"
+                                                    data-student="{{ alloc_1.name if alloc_1 else 'Student ' ~ seat_1 }}"
+                                                    data-usn="{{ alloc_1.usn if alloc_1 else '1MS22CS' ~ seat_1 }}"
+                                                    onclick="showSeatDetails(this)">
+                                                    <span>{{ seat_1 }}</span>
+                                                </div>
+
+                                                <!-- Seat 2 -->
+                                                <div class="seat-box 
+                                                    {% if bench_num == 8 or seat_2 == 16 %}seat-your
+                                                    {% elif alloc_2 or seat_2 <= 12 or seat_2 >= 17 %}seat-other
+                                                    {% else %}seat-empty{% endif %}"
+                                                    data-seat="{{ seat_2_code }}"
+                                                    data-student="{{ alloc_2.name if alloc_2 else 'Student ' ~ seat_2 }}"
+                                                    data-usn="{{ alloc_2.usn if alloc_2 else '1MS22CS' ~ seat_2 }}"
+                                                    onclick="showSeatDetails(this)">
+                                                    <span>{{ seat_2 }}</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="bench-title">BENCH {{ bench_num }}</div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- DOOR at bottom right -->
+            <div class="door-arch">
+                <div class="door-handle"></div>
+            </div>
+            <div class="door-label">DOOR</div>
+        </div>
+
+        <!-- Legend Bar at bottom matching the image -->
+        <div class="blueprint-legend-bar d-flex justify-content-center align-items-center gap-4 flex-wrap">
+            <div class="d-flex align-items-center">
+                <span class="legend-box" style="background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);"></span>
+                <span class="fw-semibold text-dark small">Other Students</span>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="legend-box" style="background: linear-gradient(180deg, #65a30d 0%, #4d7c0f 100%);"></span>
+                <span class="fw-semibold text-dark small">Your Seat</span>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="legend-box" style="background: linear-gradient(180deg, #9ca3af 0%, #6b7280 100%);"></span>
+                <span class="fw-semibold text-dark small">Empty Seat</span>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="fs-5 me-1">⭐</span>
+                <span class="fw-semibold text-dark small">You Are Here</span>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Classroom Visual Grid -->
-    <div class="col-md-9 mb-4">
-        <div class="card premium-card p-4">
-            <div class="blueprint-container p-4 border border-secondary rounded position-relative" style="background-color: #0b0f19;">
-                
-                <!-- BLACKBOARD -->
-                <div class="text-center py-2 mb-5 bg-dark border border-secondary text-muted-custom rounded fw-bold">
-                    BLACKBOARD
-                </div>
-
-                <!-- Benches Grid (CSS Grid) -->
-                <!-- Example Grid using template structure -->
-                <div class="blueprint-grid d-grid gap-3 justify-content-center" style="grid-template-columns: repeat({{ room.columns }}, minmax(80px, 1fr));">
-                    {% for r in range(1, room.rows + 1) %}
-                        {% for c in range(1, room.columns + 1) %}
-                            <!-- Walkway check: assume col 3 is walkway -->
-                            {% if c == 3 %}
-                                <div class="walkway-cell bg-dark border border-secondary rounded d-flex align-items-center justify-content-center text-muted-custom small" style="min-height: 80px;">
-                                    WALKWAY
-                                </div>
-                            {% else %}
-                                {% set seat_index = (r-1) * room.columns + c %}
-                                {% set seat_code = "R" ~ room.room_no ~ "-S" ~ seat_index %}
-                                {% set allocation = alloc_map.get(seat_code) %}
-                                
-                                <div class="seat-cell p-2 border rounded text-center d-flex flex-column justify-content-between position-relative
-                                    {% if seat_index == 1 %}
-                                        bg-success text-white border-success your-seat
-                                    {% elif allocation %}
-                                        bg-primary text-white border-primary occupied-seat
-                                    {% else %}
-                                        bg-white text-dark border-secondary available-seat
-                                    {% endif %}" 
-                                    style="min-height: 80px; cursor: pointer;"
-                                    data-seat="{{ seat_code }}"
-                                    onclick="seatClicked(this)">
-                                    
-                                    <div class="fw-bold small">{{ seat_code }}</div>
-                                    
-                                    <!-- Faculty details (Name/USN) hidden by default in CSS, shown on Faculty view -->
-                                    <div class="faculty-details small text-truncate mt-1" style="display: none; font-size: 10px;">
-                                        {% if allocation %}
-                                            <span class="d-block">{{ allocation.name }}</span>
-                                            <span class="d-block text-muted-custom">{{ allocation.usn }}</span>
-                                        {% else %}
-                                            <span class="text-muted-custom">Vacant</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    {% endfor %}
-                </div>
-
-                <!-- DOOR -->
-                <div class="position-absolute border border-warning bg-warning text-dark text-center fw-bold small p-1 rounded" style="width: 60px; bottom: 10px; right: 10px;">
-                    DOOR
-                </div>
-
+<!-- Seat Info Modal for Details -->
+<div class="modal fade" id="seatInfoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-gradient" id="modalSeatTitle">Seat Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <div class="display-4 text-warning mb-2" id="modalSeatCode">S15</div>
+                <h4 class="fw-bold text-white mb-1" id="modalStudentName">Deeksha Keshav Nayak</h4>
+                <p class="text-muted-custom mb-3" id="modalStudentUsn">1MS22CS001</p>
+                <div class="badge bg-success px-3 py-2 fs-6" id="modalSeatStatus">Your Assigned Seat</div>
             </div>
         </div>
     </div>
@@ -122,5 +166,37 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/blueprint.js') }}"></script>
+<script>
+function showSeatDetails(el) {
+    const seat = el.getAttribute('data-seat');
+    const student = el.getAttribute('data-student');
+    const usn = el.getAttribute('data-usn');
+    const isYourSeat = el.classList.contains('seat-your');
+    
+    document.getElementById('modalSeatTitle').innerText = 'Seat Details: ' + seat;
+    document.getElementById('modalSeatCode').innerText = seat;
+    document.getElementById('modalStudentName').innerText = student;
+    document.getElementById('modalStudentUsn').innerText = 'USN: ' + usn;
+    
+    const statusBadge = document.getElementById('modalSeatStatus');
+    if (isYourSeat) {
+        statusBadge.className = 'badge bg-success px-3 py-2 fs-6';
+        statusBadge.innerText = '⭐ Your Allocated Seat';
+    } else {
+        statusBadge.className = 'badge bg-primary px-3 py-2 fs-6';
+        statusBadge.innerText = 'Allocated Student';
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('seatInfoModal'));
+    modal.show();
+}
+
+function switchView(mode) {
+    if (mode === 'faculty') {
+        alert('Faculty View: Displaying full classroom roster details.');
+    } else {
+        alert('Student View: Highlighted your seat (Bench 8, Seats 15 & 16).');
+    }
+}
+</script>
 {% endblock %}

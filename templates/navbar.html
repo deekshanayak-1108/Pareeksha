@@ -1,9 +1,20 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark-glass py-3">
     <div class="container-fluid px-4">
         <a class="navbar-brand fw-bold text-gradient" href="#">PAREEKSHA ERP</a>
-        <div class="ms-auto d-flex align-items-center">
-            <span class="text-muted-custom me-3 d-none d-md-inline">Welcome, Admin</span>
-            <a href="/login" class="btn btn-outline-premium btn-sm px-3">Logout</a>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <span class="badge 
+                {% if session.get('role') == 'admin' %}bg-danger
+                {% elif session.get('role') == 'faculty' %}bg-primary
+                {% else %}bg-success{% endif %} text-uppercase px-2.5 py-1.5">
+                {{ session.get('role', 'Student') }} Portal
+            </span>
+            <span class="text-white fw-medium d-none d-md-inline">
+                Welcome, {{ session.get('user_name', 'User') }}
+            </span>
+            <a href="/login" class="btn btn-outline-premium btn-sm px-3">
+                <i class="bi bi-box-arrow-right me-1"></i> Logout
+            </a>
         </div>
     </div>
 </nav>
+

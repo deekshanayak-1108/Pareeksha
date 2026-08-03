@@ -1,39 +1,205 @@
-/* Visual Blueprint / Layout styling */
-.seat-legend {
-    width: 20px;
-    height: 20px;
+/* Visual Blueprint 3D Classroom styling matching reference image */
+
+.classroom-3d-wrapper {
+    background-color: #f6f0e6;
+    border: 12px solid #5a554c;
+    border-radius: 8px;
+    position: relative;
+    padding: 20px 40px 40px 60px;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.15);
+    font-family: 'Outfit', sans-serif;
+    color: #2b2b2b;
+}
+
+/* Side Windows */
+.window-left, .window-right {
+    position: absolute;
+    width: 14px;
+    height: 60px;
+    background: #e2f1f8;
+    border: 3px solid #4a7c9d;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+}
+.window-left { left: 4px; }
+.window-right { right: 4px; }
+
+/* Blackboard */
+.blackboard-container {
+    background: linear-gradient(180deg, #1e3e2b 0%, #152c1e 100%);
+    border: 6px solid #8b5a2b;
+    border-radius: 4px;
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-align: center;
+    padding: 10px 0;
+    width: 65%;
+    margin: 0 auto 15px auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* Teacher's Desk */
+.teachers-desk-wrapper {
+    text-align: center;
+    margin-bottom: 25px;
+}
+.teachers-chair {
+    width: 32px;
+    height: 12px;
+    background: #333333;
+    border-radius: 4px 4px 0 0;
+    margin: 0 auto 2px auto;
+}
+.teachers-desk {
+    background: #d99b56;
+    border: 2px solid #9c6630;
+    border-radius: 6px;
+    padding: 6px 20px;
     display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #3d240d;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    letter-spacing: 1px;
 }
 
-.seat-cell {
-    transition: all 0.3s ease;
+/* Classroom Aisle Divider (Dashed Lines) */
+.aisle-divider {
+    border-right: 2px dashed #999999;
+    height: 100%;
 }
 
-.seat-cell:hover {
-    transform: scale(1.05);
+/* Row Labels */
+.row-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1d3557;
+    text-transform: uppercase;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+}
+
+/* Bench Structure */
+.bench-card {
+    background: #e2c092;
+    border: 2px solid #7c542a;
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    position: relative;
+    transition: transform 0.2s ease;
+}
+.bench-card:hover {
+    transform: translateY(-2px);
+}
+.bench-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #4a3016;
+    text-align: center;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+    background: #d4a973;
+    border-radius: 4px;
+    padding: 1px 0;
+}
+
+/* Seat Styling */
+.seat-box {
+    width: 48%;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+    color: #ffffff;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+    position: relative;
+}
+
+/* Seat Colors matching reference image */
+.seat-other {
+    background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+    border: 1px solid #1e40af;
+}
+
+.seat-your {
+    background: linear-gradient(180deg, #65a30d 0%, #4d7c0f 100%);
+    border: 2px solid #365314;
+    animation: pulseGlow 2s infinite;
+}
+
+.seat-empty {
+    background: linear-gradient(180deg, #9ca3af 0%, #6b7280 100%);
+    border: 1px solid #4b5563;
+}
+
+/* You Are Here Star Badge */
+.star-badge {
+    position: absolute;
+    top: -12px;
+    right: -10px;
+    font-size: 22px;
+    color: #f59e0b;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
     z-index: 10;
 }
 
-.available-seat {
-    background-color: #f8fafc;
-    border-color: #cbd5e1;
-    color: #0f172a;
+/* Open Door */
+.door-arch {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 75px;
+    height: 75px;
+    background: #b87333;
+    border: 3px solid #5a3212;
+    border-radius: 75px 0 0 0;
+    box-shadow: -3px -3px 10px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 8px;
+}
+.door-handle {
+    width: 14px;
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+.door-label {
+    position: absolute;
+    bottom: -25px;
+    right: 15px;
+    font-weight: 800;
+    font-size: 13px;
+    color: #2b2b2b;
+    letter-spacing: 1px;
 }
 
-.occupied-seat {
-    background: #6366f1;
-    border-color: #4f46e5;
-    color: #ffffff;
+/* Bottom Legend Bar */
+.blueprint-legend-bar {
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+.legend-box {
+    width: 32px;
+    height: 20px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-right: 8px;
 }
 
-.your-seat {
-    background: #22c55e !important;
-    border-color: #16a34a !important;
-    color: #ffffff !important;
-}
-
-.walkway-cell {
-    background-color: rgba(15, 23, 42, 0.5) !important;
-    color: var(--text-secondary);
-    border: 1px dashed var(--glass-border);
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(101, 163, 13, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(101, 163, 13, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(101, 163, 13, 0); }
 }
